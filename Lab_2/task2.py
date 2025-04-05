@@ -29,6 +29,16 @@ x[0] = x0
 y[0] = y0
 z[0] = z0
 
+# Функції для правих частин диференціальних рівнянь
+def fx(x, y):
+    return -(beta / H) * x * y
+
+def fy(x, y):
+    return (beta / H) * x * y - (1 / gamma) * y
+
+def fz(x, y):
+    return (1 / gamma) * y
+
 # Крок 1: Виведення вхідних даних у таблиці
 print(f"{Fore.CYAN}\n\n=== Крок 1: Вхідні дані ===\n{Style.RESET_ALL}")
 table_data = [
@@ -73,7 +83,7 @@ print("""
 │                                            │
 │ де:                                        │
 │ k₁ₓ = fₓ(xₙ, yₙ),         k₁y = fᵧ(xₙ, yₙ) │
-│ k₁z = f_z(xₙ, yₙ)                         │
+│ k₁z = f_z(xₙ, yₙ)                          │
 │                                            │
 │ k₂ₓ = fₓ(xₙ + (h/2)k₁ₓ, yₙ + (h/2)k₁y),    │
 │ k₂y = fᵧ(xₙ + (h/2)k₁ₓ, yₙ + (h/2)k₁y),    │
@@ -100,33 +110,33 @@ print(f"{Fore.YELLOW}Обчислення значень x(t), y(t) і z(t) ме
 # Таблиця для покрокового виведення
 table_steps = [["Крок", "Час (t)", "Здорові (x)", "Хворі (y)", "Одужалі (z)", "k1x", "k1y", "k1z", "k2x", "k2y", "k2z", "k3x", "k3y", "k3z", "k4x", "k4y", "k4z"]]
 for i in range(min(5, n_steps - 1)):
-    # Обчислення коефіцієнтів k
-    k1x = -(beta/H) * x[i] * y[i]
-    k1y = (beta/H) * x[i] * y[i] - (1/gamma) * y[i]
-    k1z = (1/gamma) * y[i]
-    
-    k2x = -(beta/H) * (x[i] + h/2 * k1x) * (y[i] + h/2 * k1y)
-    k2y = (beta/H) * (x[i] + h/2 * k1x) * (y[i] + h/2 * k1y) - (1/gamma) * (y[i] + h/2 * k1y)
-    k2z = (1/gamma) * (y[i] + h/2 * k1y)
-    
-    k3x = -(beta/H) * (x[i] + h/2 * k2x) * (y[i] + h/2 * k2y)
-    k3y = (beta/H) * (x[i] + h/2 * k2x) * (y[i] + h/2 * k2y) - (1/gamma) * (y[i] + h/2 * k2y)
-    k3z = (1/gamma) * (y[i] + h/2 * k2y)
-    
-    k4x = -(beta/H) * (x[i] + h * k3x) * (y[i] + h * k3y)
-    k4y = (beta/H) * (x[i] + h * k3x) * (y[i] + h * k3y) - (1/gamma) * (y[i] + h * k3y)
-    k4z = (1/gamma) * (y[i] + h * k3y)
-    
+    # Обчислення коефіцієнтів k за допомогою функцій
+    k1x = fx(x[i], y[i])
+    k1y = fy(x[i], y[i])
+    k1z = fz(x[i], y[i])
+
+    k2x = fx(x[i] + h/2 * k1x, y[i] + h/2 * k1y)
+    k2y = fy(x[i] + h/2 * k1x, y[i] + h/2 * k1y)
+    k2z = fz(x[i] + h/2 * k1x, y[i] + h/2 * k1y)
+
+    k3x = fx(x[i] + h/2 * k2x, y[i] + h/2 * k2y)
+    k3y = fy(x[i] + h/2 * k2x, y[i] + h/2 * k2y)
+    k3z = fz(x[i] + h/2 * k2x, y[i] + h/2 * k2y)
+
+    k4x = fx(x[i] + h * k3x, y[i] + h * k3y)
+    k4y = fy(x[i] + h * k3x, y[i] + h * k3y)
+    k4z = fz(x[i] + h * k3x, y[i] + h * k3y)
+
     # Оновлення значень x, y, z
     x[i+1] = x[i] + (h/6) * (k1x + 2*k2x + 2*k3x + k4x)
     y[i+1] = y[i] + (h/6) * (k1y + 2*k2y + 2*k3y + k4y)
     z[i+1] = z[i] + (h/6) * (k1z + 2*k2z + 2*k3z + k4z)
-    
+
     # Додаємо дані до таблиці
-    table_steps.append([i+1, f"{t[i]:.1f}", f"{x[i]:.2f}", f"{y[i]:.2f}", f"{z[i]:.2f}", 
-                        f"{k1x:.2f}", f"{k1y:.2f}", f"{k1z:.2f}", 
-                        f"{k2x:.2f}", f"{k2y:.2f}", f"{k2z:.2f}", 
-                        f"{k3x:.2f}", f"{k3y:.2f}", f"{k3z:.2f}", 
+    table_steps.append([i+1, f"{t[i]:.1f}", f"{x[i]:.2f}", f"{y[i]:.2f}", f"{z[i]:.2f}",
+                        f"{k1x:.2f}", f"{k1y:.2f}", f"{k1z:.2f}",
+                        f"{k2x:.2f}", f"{k2y:.2f}", f"{k2z:.2f}",
+                        f"{k3x:.2f}", f"{k3y:.2f}", f"{k3z:.2f}",
                         f"{k4x:.2f}", f"{k4y:.2f}", f"{k4z:.2f}"])
 
 # Виводимо таблицю покрокового обчислення
@@ -135,22 +145,22 @@ print("\n")
 
 # Завершуємо обчислення для всіх кроків
 for i in range(5, n_steps - 1):
-    k1x = -(beta/H) * x[i] * y[i]
-    k1y = (beta/H) * x[i] * y[i] - (1/gamma) * y[i]
-    k1z = (1/gamma) * y[i]
-    
-    k2x = -(beta/H) * (x[i] + h/2 * k1x) * (y[i] + h/2 * k1y)
-    k2y = (beta/H) * (x[i] + h/2 * k1x) * (y[i] + h/2 * k1y) - (1/gamma) * (y[i] + h/2 * k1y)
-    k2z = (1/gamma) * (y[i] + h/2 * k1y)
-    
-    k3x = -(beta/H) * (x[i] + h/2 * k2x) * (y[i] + h/2 * k2y)
-    k3y = (beta/H) * (x[i] + h/2 * k2x) * (y[i] + h/2 * k2y) - (1/gamma) * (y[i] + h/2 * k2y)
-    k3z = (1/gamma) * (y[i] + h/2 * k2y)
-    
-    k4x = -(beta/H) * (x[i] + h * k3x) * (y[i] + h * k3y)
-    k4y = (beta/H) * (x[i] + h * k3x) * (y[i] + h * k3y) - (1/gamma) * (y[i] + h * k3y)
-    k4z = (1/gamma) * (y[i] + h * k3y)
-    
+    k1x = fx(x[i], y[i])
+    k1y = fy(x[i], y[i])
+    k1z = fz(x[i], y[i])
+
+    k2x = fx(x[i] + h/2 * k1x, y[i] + h/2 * k1y)
+    k2y = fy(x[i] + h/2 * k1x, y[i] + h/2 * k1y)
+    k2z = fz(x[i] + h/2 * k1x, y[i] + h/2 * k1y)
+
+    k3x = fx(x[i] + h/2 * k2x, y[i] + h/2 * k2y)
+    k3y = fy(x[i] + h/2 * k2x, y[i] + h/2 * k2y)
+    k3z = fz(x[i] + h/2 * k2x, y[i] + h/2 * k2y)
+
+    k4x = fx(x[i] + h * k3x, y[i] + h * k3y)
+    k4y = fy(x[i] + h * k3x, y[i] + h * k3y)
+    k4z = fz(x[i] + h * k3x, y[i] + h * k3y)
+
     x[i+1] = x[i] + (h/6) * (k1x + 2*k2x + 2*k3x + k4x)
     y[i+1] = y[i] + (h/6) * (k1y + 2*k2y + 2*k3y + k4y)
     z[i+1] = z[i] + (h/6) * (k1z + 2*k2z + 2*k3z + k4z)
